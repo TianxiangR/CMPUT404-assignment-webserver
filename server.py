@@ -31,7 +31,6 @@ import os
 
 def parseHttpRequest(request: str) -> Optional[dict]:
     try:
-        supported_header = []
         parsed_value = {}
         tokens = request.split()
         parsed_value['method'] = tokens[0]
@@ -56,12 +55,29 @@ def createPlainTextResponse(content: str) -> bytes:
 
 
 def create301Response(location: str) -> bytes:
-    response = 'HTTP/1.1 301 Moved Permanentl\r\nLocation: ' + location +'\r\n'
+    response = 'HTTP/1.1 301 Moved Permanently\r\nLocation: ' + location +'\r\n'
     return response.encode()
 
-def create404Response(message: str) -> bytes:
-    response = 'HTTP/1.1 404 Not Found\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\r' + message + '\r\n'
+def create404Response() -> bytes:
+    html_404_content = ''
+    try:
+        with open('./404.html', 'r') as file:
+            html_404_content = file.read()
+    except:
+        pass
+    response = 'HTTP/1.1 404 Not Found\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n' + html_404_content + '\r\n'
     return response.encode()
+
+def create405Response() -> bytes:
+    html_405_content = ''
+    try:
+        with open('./405.html', 'r') as file:
+            html_405_content = file.read()
+    except:
+        pass
+    response = 'HTTP/1.1 405 Method Not Allowed\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n' + html_405_content + '\r\n'
+    return response.encode()
+
 
 def isValidPath(path: str) -> bool:
     abs_path = os.path.abspath(path)
@@ -76,8 +92,8 @@ def handle_GET(pathname) -> bytes:
         file_type = ""
         if pathname.endswith('/'):
             file_path = './www' + pathname + 'index.html'
-        elif pathname.endswith('deep'):
-            response = create301Response('http://localhost:8080/deep/')
+        elif pathname == '/deep':
+            response = create301Response('http://127.0.0.1:8080/deep/')
             return response
         else:
             file_path = './www' + pathname
@@ -88,7 +104,7 @@ def handle_GET(pathname) -> bytes:
             file_type = "css"
         
         if not isValidPath(file_path):
-            response = create404Response('')
+            response = create404Response()
             return response
 
         with open(file_path, 'r') as file:
@@ -103,7 +119,7 @@ def handle_GET(pathname) -> bytes:
             
             return response
     except FileNotFoundError:
-        response = create404Response('')
+        response = create404Response()
         return response
                 
 
@@ -126,7 +142,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             self.request.sendall(response)
             print("Respond:", response.decode('utf-8'))
         elif http_method in unsupported_methods:
-            response = b'HTTP/1.1 405 Method Not Allowed\r\n\r\nMethod Not Allowed!\r\n'
+            response = create405Response()
             self.request.sendall(response)
             print("Respond:", response.decode('utf-8'))
 
