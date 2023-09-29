@@ -135,18 +135,18 @@ class MyWebServer(socketserver.BaseRequestHandler):
         http_method = parsed_request['method']
         pathname = parsed_request['pathname']
 
-        print("Received:", string_data)
+        print("[received]:", self.data)
 
         if http_method == 'GET':
             response = handle_GET(pathname)
             self.request.sendall(response)
-            print("Respond:", response.decode('utf-8'))
+            print("[responded]:", response)
         elif http_method in unsupported_methods:
             response = create405Response()
             self.request.sendall(response)
-            print("Respond:", response.decode('utf-8'))
+            print("[responded]:", response)
 
-        
+
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
 
