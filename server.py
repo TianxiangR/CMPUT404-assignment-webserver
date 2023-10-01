@@ -1,7 +1,6 @@
 #  coding: utf-8 
 import socketserver
 from typing import Optional
-import os
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -79,12 +78,22 @@ def create405Response() -> bytes:
     return response.encode()
 
 
-def isValidPath(path: str) -> bool:
-    abs_path = os.path.abspath(path)
-    accessiable_path = os.path.abspath('./www')
-    if abs_path.startswith(accessiable_path):
-        return True
-    return False
+def isValidPath(file_path: str) -> bool:
+    valid_path = ['www', 'deep']
+    tokens = file_path.split('/')``
+    ptr = 0
+
+    for token in tokens:
+        if token == '..':
+            if ptr == 0:
+                return False
+            ptr -= 1
+        if token == 'deep':
+            if valid_path[ptr] != 'www':
+                return False
+            ptr += 1
+    
+    return True
 
 def handle_GET(pathname) -> bytes:
     try:
