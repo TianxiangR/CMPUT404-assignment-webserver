@@ -80,7 +80,7 @@ def create405Response() -> bytes:
 
 def isValidPath(file_path: str) -> bool:
     valid_path = ['www', 'deep']
-    tokens = file_path.split('/')``
+    tokens = file_path.split('/')
     ptr = 0
 
     for token in tokens:
